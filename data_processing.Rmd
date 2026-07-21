@@ -1,0 +1,219 @@
+---
+title: "Data processing"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries and helpers, include=FALSE}
+
+library(dplyr)
+library(googlesheets4)
+library(ggplot2)
+library(tidyr)
+library(dm)
+library(lubridate)
+source("helper/data_clean.R")
+source("helper/unpreditability_future_scale_processing.R")
+source("helper/career_indecision_scale_processing.R")
+
+```
+
+# 0. Loading raw data
+
+Raw data is loaded from googlesheets. The console will require you to authenticate. After loading we change column names to facilitate data wrangling using 
+
+```{r}
+
+raw_data <- read_sheet("https://docs.google.com/spreadsheets/d/1CWdU5igjqq7nusOeyu75MnjIjGMejDUz3bwWHB-wRJM/edit?gid=1573672169#gid=1573672169") 
+
+raw_data <- clean_colnames(raw_data)%>% 
+  select(-`N° de participante`)
+
+```
+
+# 1. Split raw data into related dataframes
+
+We want this to have a relational database schema to facilitate future access
+
+# 1.1. Subject info
+
+```{r}
+
+
+subject_info_raw <- raw_data %>% 
+  select(ID, gender, birth_date) %>% 
+  mutate(birth_date = lubridate::ymd(as.Date(birth_date))) %>% 
+  mutate(age_months = interval(birth_date, today()) %/% months(1))%>% 
+  mutate(age_years = time_length(interval(birth_date, today()), "years"))
+
+
+```
+
+## 1.2. home environment
+
+```{r}
+
+home_environment_raw <- raw_data %>% 
+  select(ID, max_educ_level_mother, max_educ_level_father) %>% 
+  mutate(max_educ_level_mother_num = case_when(
+    max_educ_level_mother == "Primario incompleto" ~ 1,
+        max_educ_level_mother == "Primario completo" ~ 2,
+        max_educ_level_mother == "Secundario incompleto" ~ 3,
+        max_educ_level_mother == "Secundario completo" ~ 4,
+        max_educ_level_mother == "Terciario incompleto" ~ 5,
+        max_educ_level_mother == "Terciario completo" ~ 6,
+        max_educ_level_mother == "Terciario en curso" ~ 7,
+        max_educ_level_mother == "Universitario incompleto" ~ 8,
+        max_educ_level_mother == "Universitario completo" ~ 9,
+        max_educ_level_mother == "Posgrado incompleto" ~ 10,
+        max_educ_level_mother == "Posgrado completo" ~ 11,
+  ))%>% 
+  mutate(max_educ_level_father_num = case_when(
+    max_educ_level_father == "Primario incompleto" ~ 1,
+        max_educ_level_father == "Primario completo" ~ 2,
+        max_educ_level_father == "Secundario incompleto" ~ 3,
+        max_educ_level_father == "Secundario completo" ~ 4,
+        max_educ_level_father == "Terciario incompleto" ~ 5,
+        max_educ_level_father == "Terciario completo" ~ 6,
+        max_educ_level_father == "Terciario en curso" ~ 7,
+        max_educ_level_father == "Universitario incompleto" ~ 8,
+        max_educ_level_father == "Universitario completo" ~ 9,
+        max_educ_level_father == "Posgrado incompleto" ~ 10,
+        max_educ_level_father == "Posgrado completo" ~ 11,
+  ))
+
+```
+
+## 1.3. MacArthur Scale
+
+```{r}
+
+mac_arthur_scale_raw <- raw_data %>% 
+  select(ID, society_ladder)
+
+
+```
+
+## 1.4. Unpredictability
+
+```{r}
+
+future_unpredictability_raw <- unpredictability_future_processing(raw_data) %>% 
+  select(-item_text)
+
+future_unpredictability_items <- unpreditability_future_items(raw_data)
+
+```
+
+
+## 1.5. Career indecision
+
+```{r}
+
+career_indecision_raw <- raw_data %>% 
+  select(ID, contains("CIP_")) %>% 
+  career_indecision_processing() 
+
+career_indecision_items <- career_indecision_items()
+
+```
+
+
+# Plot relational schema
+
+```{r}
+
+current_dm <- dm(subject_info_raw,
+                 home_environment_raw, 
+                 mac_arthur_scale_raw,
+                 future_unpredictability_raw, future_unpredictability_items,
+                 career_indecision_raw, career_indecision_items) %>%
+  # dm_enum_pk_candidates(career_indecision_items)
+  dm_add_pk(subject_info_raw, ID) %>%              
+  dm_add_pk(future_unpredictability_raw, item_name) %>% 
+  dm_add_pk(career_indecision_raw, item_name) %>% 
+  dm_add_fk(home_environment_raw, ID, subject_info_raw) %>%  
+  dm_add_fk(mac_arthur_scale_raw, ID, subject_info_raw)   %>% 
+  dm_add_fk(future_unpredictability_raw, ID, subject_info_raw) %>%
+  dm_add_fk(future_unpredictability_items, item_name, future_unpredictability_raw)%>%
+  dm_add_fk(career_indecision_raw, ID, subject_info_raw) %>% 
+  dm_add_fk(career_indecision_items, item_name, career_indecision_raw)
+
+
+my_dm_draw <- function(dm, rankdir = "RL", view_type = "all") {
+  data_model <- dm:::dm_get_data_model(dm, FALSE)
+  graph <- dm:::bdm_create_graph(
+    data_model,
+    rankdir      = rankdir,
+    view_type    = view_type,
+    columnArrows = TRUE,
+    graph_attrs  = "",
+    node_attrs   = "",
+    edge_attrs   = "",
+    graph_name   = "Data Model",
+    font_size    = list()
+  )
+  
+  # Inject layout options into the DOT string
+  dot <- graph$dot_code
+  dot <- gsub(
+    "graph \\[",
+    "graph [splines=polyline nodesep=1 ranksep=1.5 ",
+    dot
+  )
+  
+  DiagrammeR::grViz(dot)
+}
+
+(relational_database_plot <- my_dm_draw(current_dm))
+
+library(DiagrammeRsvg)
+library(rsvg)
+
+
+relational_database_plot%>%
+  export_svg() %>%
+  charToRaw() %>%
+  rsvg_png("relational_database_plot.png")
+
+
+```
+
+
+# Save data into csv's
+
+```{r}
+
+write.csv(subject_info_raw, "data/data_raw/subject_info_raw.csv", row.names = F)
+
+write.csv(home_environment_raw, "data/data_raw/home_environment_raw.csv", row.names = F)
+
+write.csv(mac_arthur_scale_raw, "data/data_raw/mac_arthur_scale_raw.csv", row.names = F)
+
+write.csv(future_unpredictability_raw, "data/data_raw/future_unpredictability_raw.csv", row.names = F)
+
+write.csv(future_unpredictability_items, "data/data_raw/future_unpredictability_items.csv", row.names = F)
+
+write.csv(career_indecision_raw, "data/data_raw/career_indecision_raw.csv", row.names = F)
+
+write.csv(career_indecision_items, "data/data_raw/career_indecision_items.csv", row.names = F)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
