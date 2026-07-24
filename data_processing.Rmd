@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r libraries and helpers, include=FALSE}
 
+rm(list = ls())
+
 library(dplyr)
 library(googlesheets4)
 library(ggplot2)
@@ -19,6 +21,7 @@ library(lubridate)
 source("helper/data_clean.R")
 source("helper/unpreditability_future_scale_processing.R")
 source("helper/career_indecision_scale_processing.R")
+source("helper/orientacion_vocacional_preguntas.R")
 
 ```
 
@@ -115,10 +118,24 @@ future_unpredictability_items <- unpreditability_future_items(raw_data)
 ```{r}
 
 career_indecision_raw <- raw_data %>% 
-  select(ID, contains("CIP_")) %>% 
   career_indecision_processing() 
 
-career_indecision_items <- career_indecision_items()
+career_indecision_items <- career_indecision_items(raw_data
+                                                    )
+
+```
+
+## 1.6. Orientación vocacional
+
+```{r}
+
+orientacion_vocacional_cuanti_raw <- orientacion_vocacional_processing_cuanti(raw_data) %>% 
+  select(-item_text)
+
+
+orientacion_vocacional_cuanti_items <- orientacion_vocacional_processing_cuanti(raw_data) %>% 
+  select(item_name, item_text)
+
 
 ```
 
@@ -127,21 +144,32 @@ career_indecision_items <- career_indecision_items()
 
 ```{r}
 
-current_dm <- dm(subject_info_raw,
-                 home_environment_raw, 
-                 mac_arthur_scale_raw,
-                 future_unpredictability_raw, future_unpredictability_items,
-                 career_indecision_raw, career_indecision_items) %>%
-  # dm_enum_pk_candidates(career_indecision_items)
+current_dm <- dm(
+  
+  # Primero agrego los dfs al diagrama
+  subject_info_raw,
+  home_environment_raw, 
+  mac_arthur_scale_raw, 
+  future_unpredictability_raw, future_unpredictability_items, 
+  career_indecision_raw, career_indecision_items,
+  orientacion_vocacional_cuanti_raw, orientacion_vocacional_cuanti_items
+  ) %>%
+  
+  # Agrego las claves primarias
   dm_add_pk(subject_info_raw, ID) %>%              
   dm_add_pk(future_unpredictability_raw, item_name) %>% 
   dm_add_pk(career_indecision_raw, item_name) %>% 
+  dm_add_pk(orientacion_vocacional_cuanti_raw, item_name) %>%
+  
+  # Agrego las claves foráneas
   dm_add_fk(home_environment_raw, ID, subject_info_raw) %>%  
   dm_add_fk(mac_arthur_scale_raw, ID, subject_info_raw)   %>% 
   dm_add_fk(future_unpredictability_raw, ID, subject_info_raw) %>%
   dm_add_fk(future_unpredictability_items, item_name, future_unpredictability_raw)%>%
   dm_add_fk(career_indecision_raw, ID, subject_info_raw) %>% 
-  dm_add_fk(career_indecision_items, item_name, career_indecision_raw)
+  dm_add_fk(career_indecision_items, item_name, career_indecision_raw)%>% 
+  dm_add_fk(orientacion_vocacional_cuanti_raw, ID, subject_info_raw) %>% 
+  dm_add_fk(orientacion_vocacional_cuanti_items, item_name, orientacion_vocacional_cuanti_raw)
 
 
 my_dm_draw <- function(dm, rankdir = "RL", view_type = "all") {
@@ -188,19 +216,35 @@ relational_database_plot%>%
 
 ```{r}
 
+# Subject info
+
 write.csv(subject_info_raw, "data/data_raw/subject_info_raw.csv", row.names = F)
+
+# Home environment
 
 write.csv(home_environment_raw, "data/data_raw/home_environment_raw.csv", row.names = F)
 
+# macarthur
+
 write.csv(mac_arthur_scale_raw, "data/data_raw/mac_arthur_scale_raw.csv", row.names = F)
+
+# Future unpredictability
 
 write.csv(future_unpredictability_raw, "data/data_raw/future_unpredictability_raw.csv", row.names = F)
 
 write.csv(future_unpredictability_items, "data/data_raw/future_unpredictability_items.csv", row.names = F)
 
+# Career indecision
+
 write.csv(career_indecision_raw, "data/data_raw/career_indecision_raw.csv", row.names = F)
 
 write.csv(career_indecision_items, "data/data_raw/career_indecision_items.csv", row.names = F)
+
+# Orientacion vocacional
+
+write.csv(orientacion_vocacional_cuanti_raw, "data/data_raw/orientacion_vocacional_cuanti_raw.csv", row.names = F)
+
+write.csv(orientacion_vocacional_cuanti_items, "data/data_raw/orientacion_vocacional_cuanti_items.csv", row.names = F)
 
 ```
 
@@ -208,6 +252,7 @@ write.csv(career_indecision_items, "data/data_raw/career_indecision_items.csv", 
 
 
 
+  
 
 
 
