@@ -1,0 +1,146 @@
+---
+title: "Análisis descriptivos"
+subtitle: "Toma de decisiones vocacionales en contextos de impredecibilidad"
+# format: html
+# execute:
+#   echo: true
+#   warning: false
+#   message: false
+# toc: true
+date: "`r Sys.time()`"
+# css: style.css
+---
+
+En este documento, se visualiza de forma exploratoria la distribución de algunas variables de interés. Además, se genera un dataset llamado df_completo_impredecibilidad_adolescencia_carrera.csv con dichas variables en formato ancho.
+
+## 0. Paquetes, funcions y datos
+
+```{r libraries and functions, message= F}
+
+rm(list = ls())
+unlink("Tablas/*")
+unlink("Figuras/*")
+
+# set.seed(123)
+library(tidyverse)
+library(flextable)
+library(ggpubr)
+# source("helper/helper_tables.R")
+# source("helper/helper_functons.R")
+
+```
+
+```{r data loading, message= F}
+
+# Cargo datos
+
+sujetos <- read.csv("data/data_raw/subject_info_raw.csv")
+
+contexto_familiar_raw <- read.csv("data/data_raw/home_environment_raw.csv")
+
+nse_percibido_raw <- read.csv("data/data_raw/mac_arthur_scale_raw.csv")
+
+impredecibilidad_raw <- read.csv("data/data_raw/future_unpredictability_raw.csv")
+
+orientacion_vocacional_cuanti_raw <- read.csv("data/data_raw/orientacion_vocacional_cuanti_raw.csv")
+
+indecision_carrera <- read.csv("data/data_raw/career_indecision_raw.csv")
+
+```
+
+
+## 1. Información de los participantes
+
+```{r subject info}
+
+hist(sujetos$age_years)
+
+table(sujetos$gender)
+
+```
+## 2. Información del contexto + Nivel socioeconómico percibido
+
+```{r context info}
+
+table(contexto_familiar_raw$max_educ_level_mother)
+
+table(contexto_familiar_raw$max_educ_level_father)
+
+hist(nse_percibido_raw$society_ladder)
+
+
+```
+
+
+
+## 3. Indecision carrera
+
+```{r indecision}
+
+indecision_carrera_scores <- indecision_carrera %>% 
+  filter(item_name == "CIP_01_decision" | item_name == "CIP_02" | grepl("score", item_name))
+
+indecision_carrera_scores %>% 
+  ggplot(aes(x = value))+
+  geom_histogram(binwidth = 1)+
+  facet_wrap(~ item_name)
+
+# Paso a formato wide
+
+indecision_carrera_scores_wide <- indecision_carrera_scores %>% 
+  pivot_wider(id_cols = "ID", names_from = item_name, values_from = value)
+
+```
+
+## 4. Impredecibilidad
+
+```{r unpredictability}
+
+
+impredecibilidad_raw %>% 
+  ggplot(aes(x = response_inverted))+
+  geom_histogram(binwidth = 1)+
+  facet_wrap(~ item_name)
+
+
+impredecibilidad_wide <- impredecibilidad_raw %>% 
+  pivot_wider(id_cols = "ID", names_from = item_name, values_from = response_inverted)
+
+```
+
+
+## 5. Vocational
+
+```{r vocational}
+
+
+orientacion_vocacional_cuanti_raw %>% 
+  ggplot(aes(x = response))+
+  geom_histogram(binwidth = 1)+
+  facet_wrap(~ item_name)
+
+
+orientacion_vocacional_cuanti_wide <- orientacion_vocacional_cuanti_raw %>% 
+  pivot_wider(id_cols = "ID", names_from = item_name, values_from = response)
+
+```
+
+
+## 6. Write df_completo_impredecibilidad_adolescencia_carrera.csv
+
+```{r}
+
+df_completo <- sujetos %>% 
+  left_join(contexto_familiar_raw) %>% 
+  left_join(nse_percibido_raw) %>% 
+  left_join(impredecibilidad_wide) %>% 
+  left_join(orientacion_vocacional_cuanti_wide) %>% 
+  left_join(indecision_carrera_scores_wide) 
+
+write.csv(df_completo, "data/df_completo_impredecibilidad_adolescencia_carrera.csv")
+
+```
+
+
+
+

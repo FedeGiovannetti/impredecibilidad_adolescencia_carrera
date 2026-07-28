@@ -1,0 +1,98 @@
+---
+title: "análisis principal"
+subtitle: "Clustering implementation and groups comparisons"
+# format: html
+# execute:
+#   echo: true
+#   warning: false
+#   message: false
+# toc: true
+# date: "`r Sys.time()`"
+# css: style.css
+---
+
+## 0. Packages, functions and data
+
+```{r libraries and functions, message= F}
+
+rm(list = ls())
+unlink("Tables/*")
+unlink("Figures/*")
+
+# set.seed(123)
+library(tidyverse)
+library(flextable)
+library(ggpubr)
+source("helper/helper_tables.R")
+source("helper/helper_functons.R")
+
+```
+
+```{r data loading, message= F}
+
+df_completo = read.csv("data/df_completo_impredecibilidad_adolescencia_carrera.csv")
+
+orientacion_vocacional_cuanti_raw <- read.csv("data/data_raw/orientacion_vocacional_cuanti_raw.csv")
+
+
+```
+
+
+## 1. Tabla 1. Probabilidad de continuar con los estudios superiores
+
+```{r sample info}
+
+variables = c("probable_continuar_estudios")
+
+orientacion_vocacional_cuanti_raw %>% 
+  filter(item_name %in% variables) %>% 
+  # group_by(item_name, response) %>% 
+  summarise(Cantidad = n(),.by = c(item_name, response),
+            Porcentaje = paste(round((Cantidad/nrow(df_completo))*100, digits = 1), "%")
+            ) %>% 
+  arrange(response) %>% 
+  pivot_wider(
+    id_cols = item_name,
+    names_from = response,
+    values_from = Porcentaje
+  ) %>% 
+  mutate(item_name = "¿Cuán probable es que continúes los estudios superiores al terminar la secundaria?") %>% 
+  custom_flextable("Tabla 1. Probabilidad de continuar la secundaria para toda la muestra")
+ 
+
+
+```
+
+```{r sample info}
+
+
+
+
+df_completo %>% 
+  group_by(gender) %>% 
+  summarise(Participantes = as.character(n()),
+            Probabilidad = mean_sd(probable_continuar_estudios)
+            ) %>% 
+  # mutate(Probabilidad = ifelse(Participantes == 1, "-", Probabilidad)) %>% 
+  select(-Participantes) %>% 
+  pivot_longer(
+    cols = c(Probabilidad), 
+    names_to = " ", 
+    values_to = "valor"
+  ) %>% 
+  pivot_wider(
+    names_from = gender, 
+    values_from = valor
+  ) %>% 
+  # mutate(Total = c(
+  #   as.character(nrow(df_completo)),
+  #   mean_sd(df_completo$age_years)
+  # )) %>% 
+  # select(" ", Total, everything()) %>% 
+  # flextable() %>% 
+  custom_flextable("Tabla 1. Probabilidad de continuar los estudios (del 1 al 10)")
+ 
+
+
+```
+

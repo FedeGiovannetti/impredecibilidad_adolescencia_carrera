@@ -38,10 +38,11 @@ career_indecision_processing <- function(data){
     # na.omit()
   
   # Extract relevant columns from data
-  processed_data <- data %>%
+  processed_data <<- data %>%
     rename(any_of(exact_matches)) %>%
     mutate(across(starts_with(c("CIP_CC","CIP_LR", "CIP_IC", "CIP_NNA")), ~ case_when(
       .x == "Muy en desacuerdo" ~ 1,
+      .x == "Muy en desacuerdo." ~ 1,
       .x == "Moderadamente en desacuerdo" ~ 2,
       .x == "Levemente en desacuerdo" ~ 3,
       .x == "Moderadamente de acuerdo" ~ 4,
@@ -70,7 +71,7 @@ career_indecision_processing <- function(data){
            CIP_LR_score = CIP_LR01 + CIP_LR02 + CIP_LR03 + CIP_LR04 + CIP_LR05,
            CIP_IC_score = CIP_IC01 + CIP_IC02 + CIP_IC03 + CIP_IC04 + CIP_IC05,
            CIP_NNA_score = CIP_NNA01 + CIP_NNA02 + CIP_NNA03 + CIP_NNA04 + CIP_NNA05) %>%
-    
+
     select(ID, contains("CIP_")) %>%
     pivot_longer(cols = -ID, names_to = "item_name",
                  values_to = "value")

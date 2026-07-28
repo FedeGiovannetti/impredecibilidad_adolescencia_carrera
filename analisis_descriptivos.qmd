@@ -1,0 +1,181 @@
+---
+title: "Main Analyses"
+# subtitle: "Clustering implementation and groups comparisons"
+# format: html
+# execute:
+#   echo: true
+#   warning: false
+#   message: false
+# toc: true
+# date: "`r Sys.time()`"
+# css: style.css
+---
+
+## 0. Packages, functions and data
+
+```{r libraries and functions, message= F}
+
+rm(list = ls())
+unlink("Tables/*")
+unlink("Figures/*")
+
+# set.seed(123)
+library(tidyverse)
+library(flextable)
+library(ggpubr)
+source("helper/helper_tables.R")
+source("helper/helper_functons.R")
+
+```
+
+```{r data loading, message= F}
+
+df_completo = read.csv("data/df_completo_impredecibilidad_adolescencia_carrera.csv")
+
+```
+
+
+## 1. Tabla 1. Información de los participantes
+
+```{r sample info}
+
+mean_sd <- function(variable){
+  
+  paste(
+    round(
+      mean(variable, na.rm = TRUE),
+      digits = 2),
+    " (",
+    
+    round(
+      sd(variable, na.rm = TRUE),
+      digits = 2),
+    ")",
+    
+    sep = "")
+  
+}
+
+
+
+df_completo %>% 
+  group_by(gender) %>% 
+  summarise(Participantes = as.character(n()),
+            Edad = mean_sd(age_years)
+            ) %>% 
+  mutate(Edad = ifelse(Participantes == 1, "-", Edad)) %>% 
+  pivot_longer(
+    cols = c(Participantes, Edad), 
+    names_to = " ", 
+    values_to = "valor"
+  ) %>% 
+  pivot_wider(
+    names_from = gender, 
+    values_from = valor
+  ) %>% 
+  mutate(Total = c(
+    as.character(nrow(df_completo)),
+    mean_sd(df_completo$age_years)
+  )) %>% 
+  select(" ", Total, everything()) %>% 
+  # flextable() %>% 
+  custom_flextable("Tabla 1. Cantidad de participantes y edades por género")%>%
+  set_header_labels(name = "Tabla 1. Cantidad de participantes y edades por género", value = "")   # Remove column names
+    
+ 
+
+
+```
+
+# 2. Nivel socioeconómico
+
+## 2.1. Máximo nivel de estudios alcanzado por los padres
+
+```{r nivel educativo tabla}
+
+
+nivel_ed_madre_df <- df_completo %>% 
+  group_by(max_educ_level_mother) %>% 
+  summarise("Nivel educativo madre" = n()) %>% 
+  rename("Nivel_ed" = max_educ_level_mother)
+
+
+nivel_ed_padre_df <- df_completo %>% 
+  group_by(max_educ_level_father) %>% 
+  summarise("Nivel educativo padre" = n())%>% 
+  rename("Nivel_ed" = max_educ_level_father)
+
+
+nivel_educativo <- nivel_ed_madre_df %>% 
+  left_join(nivel_ed_padre_df) %>% 
+  mutate(Nivel_ed = factor(Nivel_ed,
+                           levels = c(
+                             "Primario completo", "Secundario incompleto",
+                             "Secundario completo", "Terciario en curso",
+                             "Universitario incompleto", "Universitario completo",
+                             "Posgrado incompleto"
+                           ))) %>% 
+  rename("Nivel educativo" = Nivel_ed) %>% 
+  rename("Madres" = "Nivel educativo madre",
+         "Padres" = "Nivel educativo padre")
+
+nivel_educativo%>% 
+  arrange("Nivel educativo") %>% 
+  
+  custom_flextable("Tabla 2. Nivel educativo de los padres")
+
+
+
+
+```
+
+```{r nivel educativo figura}
+
+nivel_educativo %>% 
+  pivot_longer(cols = -"Nivel educativo", names_to = "Progenitor", values_to = "Cantidad") %>% 
+  ggplot(aes(x = `Nivel educativo`, y = Cantidad, fill = Progenitor))+
+  geom_col(position = "dodge") +
+  coord_flip()+
+  labs(x = "Maximo nivel de estudios alcanzado")
+
+
+```
+
+## 2.2. Nivel socioeconómico percibido
+
+```{r macarthur tabla}
+
+df_completo %>% 
+  summarise("Del 1 al 10 ¿En que peldaño de la escalera crees que te encontras?" = mean_sd(society_ladder)) %>%
+  custom_flextable("Tabla 3. Media y desvio estándar para el nivel socioeconómico percibido")
+
+```
+
+```{r macarthur grafico}
+
+df_completo %>% 
+  group_by(society_ladder) %>% 
+  summarise(Cantidad = n()) %>% 
+  ggplot(aes(x = society_ladder, y = Cantidad))+
+  geom_col()+
+  scale_x_continuous(limits = c(1,10), breaks = 1:10)+
+  xlab("Marca del 1 al 10 en que peldaño de la escalera crees que te encontras")
+
+
+```
+## 2.3. Asociación entre nivel socioeconómico objetivo y percibido
+
+El nivel educativo de los padres se asocia parcialmente entre sí, pero no se asocia con el NSE percibido.
+
+```{r correlaciones NSE}
+
+df_completo %>% 
+  select(max_educ_level_mother_num, max_educ_level_father_num, society_ladder) %>% 
+  rename("NSE percibido" = society_ladder,
+         "Nivel educativo madre" = max_educ_level_mother_num,
+         "Nivel educativo padre" = max_educ_level_father_num) %>% 
+  correlation_table() %>% 
+  custom_flextable("")
+
+```
+
