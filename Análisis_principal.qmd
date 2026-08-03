@@ -24,7 +24,7 @@ library(tidyverse)
 library(flextable)
 library(ggpubr)
 source("helper/helper_tables.R")
-source("helper/helper_functons.R")
+source("helper/helper_functions.R")
 
 ```
 
@@ -33,14 +33,15 @@ source("helper/helper_functons.R")
 df_completo = read.csv("data/df_completo_impredecibilidad_adolescencia_carrera.csv")
 
 orientacion_vocacional_cuanti_raw <- read.csv("data/data_raw/orientacion_vocacional_cuanti_raw.csv")
-
+orientacion_vocacional_items <- read.csv("data/data_raw/orientacion_vocacional_cuanti_items.csv") %>% 
+  distinct()
 
 ```
 
 
 ## 1. Tabla 1. Probabilidad de continuar con los estudios superiores
 
-```{r sample info}
+```{r Probabilidad continuar tabla}
 
 variables = c("probable_continuar_estudios")
 
@@ -62,6 +63,28 @@ orientacion_vocacional_cuanti_raw %>%
 
 
 ```
+
+
+```{r Probabilidad continuar figura}
+
+variables = c("probable_continuar_estudios")
+
+orientacion_vocacional_cuanti_raw %>% 
+  filter(item_name %in% variables) %>% 
+  # group_by(item_name, response) %>% 
+  summarise(Cantidad = n(),.by = c(item_name, response),
+            Porcentaje = paste(round((Cantidad/nrow(df_completo))*100, digits = 1), "%")
+            ) %>% 
+  ggplot(aes(x = response, y = Cantidad))+
+  geom_bar(stat = "identity")+
+  scale_x_continuous(limits = c(0.5,10.5), breaks = 1:10)+
+  ggtitle("¿Cuán probable es que continúes los estudios superiores al terminar la secundaria?")
+ 
+
+
+```
+
+
 
 ```{r sample info}
 
@@ -92,6 +115,201 @@ df_completo %>%
   # flextable() %>% 
   custom_flextable("Tabla 1. Probabilidad de continuar los estudios (del 1 al 10)")
  
+
+
+```
+
+
+
+```{r sample info}
+
+
+
+
+df_completo %>% 
+  filter(gender %in% c("Femenino", "Masculino")) %>% 
+  group_by(gender, probable_continuar_estudios) %>% 
+  summarise(Cantidad = n()
+            ) %>% 
+  group_by(gender) %>% 
+  mutate(Porcentaje = Cantidad/sum(Cantidad)*100) %>% 
+  ggplot(aes(x = probable_continuar_estudios, y = Porcentaje, fill = gender))+
+  geom_bar(stat = "identity", position = "dodge")+
+  scale_x_continuous(limits = c(0.5,10.5), breaks = 1:10)+
+  ggtitle("¿Cuán probable es que continúes los estudios superiores al terminar la secundaria?\nPor género")
+ 
+
+
+```
+
+```{r sample info}
+
+
+df_completo %>% 
+  group_by(max_educ_level_mother) %>% 
+  summarise(Participantes = as.character(n()),
+            Probabilidad = mean_sd(probable_continuar_estudios)
+            ) %>% 
+  # mutate(Probabilidad = ifelse(Participantes == 1, "-", Probabilidad)) %>% 
+  select(-Participantes) %>% 
+  pivot_longer(
+    cols = c(Probabilidad), 
+    names_to = " ", 
+    values_to = "valor"
+  ) %>% 
+  pivot_wider(
+    names_from = max_educ_level_mother, 
+    values_from = valor
+  ) %>% 
+
+  custom_flextable("Tabla 1. Probabilidad de continuar los estudios (del 1 al 10)")
+ 
+
+
+```
+
+
+```{r sample info}
+
+
+df_completo %>% 
+  group_by(max_educ_level_mother, gender) %>% 
+  mutate(max_educ_level_mother = factor(max_educ_level_mother,
+                                        c("Primario incompleto",
+                                          "Primario completo",
+                                          "Secundario incompleto",
+                                          "Secundario completo",
+                                          "Terciario incompleto",
+                                          "Universitario incompleto",
+                                          "Universitario completo",
+                                          "Posgrado incompleto"
+                                          
+                                        ))) %>% 
+  summarise(Participantes = as.character(n()),
+            Probabilidad = mean(probable_continuar_estudios)
+            ) %>% 
+  # mutate(Probabilidad = ifelse(Participantes == 1, "-", Probabilidad)) %>% 
+  select(-Participantes) %>% 
+  pivot_longer(
+    cols = c(Probabilidad), 
+    names_to = " ", 
+    values_to = "valor"
+  ) %>% 
+  
+  ggplot(aes(x = max_educ_level_mother, y = valor, fill = gender))+
+  geom_bar(stat = "identity", position = "dodge")+
+  coord_flip()
+
+
+```
+El nivel educativo de madre y/o padre podría influir de forma distinta en varones y mujeres?
+
+## 1. Tabla 1. Considera trabajar
+
+```{r Probabilidad continuar tabla}
+
+variables = c("considera_trabajar")
+
+orientacion_vocacional_cuanti_raw %>% 
+  filter(item_name %in% variables) %>% 
+  mutate(response = ifelse(response == 0, "No", "Si")) %>% 
+  # group_by(item_name, response) %>% 
+  summarise(Cantidad = n(),.by = c(item_name, response),
+            Porcentaje = paste(round((Cantidad/nrow(df_completo))*100, digits = 1), "%")
+            ) %>% 
+  arrange(response) %>% 
+  pivot_wider(
+    id_cols = item_name,
+    names_from = response,
+    values_from = Porcentaje
+  ) %>% 
+  mutate(item_name = "¿Considerás necesario trabajar inmediatamente al egresar?") %>% 
+  custom_flextable("")
+ 
+
+
+```
+
+
+
+
+## 1. Tabla 1. Considera trabajar
+
+```{r Probabilidad continuar tabla}
+
+df_completo %>% 
+  group_by(gender) %>% 
+  summarise(Participantes = as.character(n()),
+            Probabilidad = mean(considera_trabajar)*100
+            ) %>% 
+  select(-Participantes) %>% 
+  pivot_longer(
+    cols = c(Probabilidad), 
+    names_to = " ", 
+    values_to = "valor"
+  ) %>% 
+  pivot_wider(
+    names_from = gender, 
+    values_from = valor
+  ) %>% 
+  custom_flextable("¿Considerás necesario trabajar inmediatamente al egresar? (%)")
+
+
+```
+
+
+```{r}
+
+df_completo %>% 
+  ggplot(aes(x = max_educ_level_father_num, y = probable_continuar_estudios, color = gender))+
+  geom_point(size = 3)+
+  geom_smooth(method = "lm")
+
+
+
+
+
+```
+
+
+```{r}
+
+df_completo %>% 
+  ggplot(aes(x = society_ladder, y = probable_continuar_estudios,color = gender))+
+  geom_point(size = 3)+
+  geom_smooth(method = "lm")
+
+
+df_completo %>% 
+  ggplot(aes(x = unpred_future_general, y = probable_continuar_estudios, color = gender))+
+  geom_point(size = 3)+
+  geom_smooth(method = "lm")
+
+
+df_completo %>% 
+  ggplot(aes(x = unpred_future_economy, y = probable_continuar_estudios, color = gender))+
+  geom_point(size = 3)+
+  geom_smooth(method = "lm")
+
+df_completo %>% 
+  ggplot(aes(x = unpred_life_1_year, y = probable_continuar_estudios, color = gender))+
+  geom_point(size = 3)+
+  geom_smooth(method = "lm")
+
+
+
+df_completo %>% 
+  ggplot(aes(x = gender, y = CIP_01_decision, fill = gender))+
+  geom_boxplot()
+  geom_smooth(method = "lm")
+  
+  
+  
+df_completo %>% 
+  ggplot(aes(x = unpred_future_general, y = CIP_01_decision, color = gender))+
+  geom_point(size = 3)+
+  geom_smooth(method = "lm")
+
 
 
 ```

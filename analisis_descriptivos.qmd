@@ -24,7 +24,7 @@ library(tidyverse)
 library(flextable)
 library(ggpubr)
 source("helper/helper_tables.R")
-source("helper/helper_functons.R")
+source("helper/helper_functions.R")
 
 ```
 
@@ -39,22 +39,6 @@ df_completo = read.csv("data/df_completo_impredecibilidad_adolescencia_carrera.c
 
 ```{r sample info}
 
-mean_sd <- function(variable){
-  
-  paste(
-    round(
-      mean(variable, na.rm = TRUE),
-      digits = 2),
-    " (",
-    
-    round(
-      sd(variable, na.rm = TRUE),
-      digits = 2),
-    ")",
-    
-    sep = "")
-  
-}
 
 
 
@@ -158,7 +142,7 @@ df_completo %>%
   summarise(Cantidad = n()) %>% 
   ggplot(aes(x = society_ladder, y = Cantidad))+
   geom_col()+
-  scale_x_continuous(limits = c(1,10), breaks = 1:10)+
+  scale_x_continuous(limits = c(1,11), breaks = 1:10)+
   xlab("Marca del 1 al 10 en que peldaño de la escalera crees que te encontras")
 
 
@@ -174,8 +158,9 @@ df_completo %>%
   rename("NSE percibido" = society_ladder,
          "Nivel educativo madre" = max_educ_level_mother_num,
          "Nivel educativo padre" = max_educ_level_father_num) %>% 
-  correlation_table() %>% 
-  custom_flextable("")
+  psych::corr.test()
+  # correlation_table() %>% 
+  # custom_flextable("")
 
 ```
 
