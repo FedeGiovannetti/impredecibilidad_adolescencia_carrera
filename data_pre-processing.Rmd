@@ -87,7 +87,33 @@ home_environment_raw <- raw_data %>%
         max_educ_level_father == "Universitario completo" ~ 9,
         max_educ_level_father == "Posgrado incompleto" ~ 10,
         max_educ_level_father == "Posgrado completo" ~ 11,
-  ))
+  )) %>% 
+  mutate(max_educ_level_mother_agrup = case_when(
+        max_educ_level_mother == "Primario completo" ~ "Secundario incompleto o menos",
+        max_educ_level_mother == "Secundario incompleto" ~ "Secundario incompleto o menos",
+        max_educ_level_mother == "Secundario completo" ~ "Secundario completo",
+        max_educ_level_mother == "Terciario incompleto" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_mother == "Terciario completo" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_mother == "Terciario en curso" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_mother == "Universitario incompleto" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_mother == "Universitario completo" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_mother == "Posgrado incompleto" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_mother == "Posgrado completo" ~ "Continuó estudios (finalizados o no)",
+  ))%>% 
+  mutate(max_educ_level_father_agrup = case_when(
+        max_educ_level_father == "Primario completo" ~ "Secundario incompleto o menos",
+        max_educ_level_father == "Secundario incompleto" ~ "Secundario incompleto o menos",
+        max_educ_level_father == "Secundario completo" ~ "Secundario completo",
+        max_educ_level_father == "Terciario incompleto" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_father == "Terciario completo" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_father == "Terciario en curso" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_father == "Universitario incompleto" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_father == "Universitario completo" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_father == "Posgrado incompleto" ~ "Continuó estudios (finalizados o no)",
+        max_educ_level_father == "Posgrado completo" ~ "Continuó estudios (finalizados o no)",
+  )) %>% 
+  rowwise() %>% 
+  mutate(max_educ_level_parental = max(max_educ_level_father_num, max_educ_level_mother_num))
 
 ```
 

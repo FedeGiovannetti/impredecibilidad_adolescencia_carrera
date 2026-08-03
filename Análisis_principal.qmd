@@ -73,9 +73,9 @@ orientacion_vocacional_cuanti_raw %>%
   filter(item_name %in% variables) %>% 
   # group_by(item_name, response) %>% 
   summarise(Cantidad = n(),.by = c(item_name, response),
-            Porcentaje = paste(round((Cantidad/nrow(df_completo))*100, digits = 1), "%")
+            Porcentaje = round((Cantidad/nrow(df_completo))*100, digits = 1)
             ) %>% 
-  ggplot(aes(x = response, y = Cantidad))+
+  ggplot(aes(x = response, y = Porcentaje))+
   geom_bar(stat = "identity")+
   scale_x_continuous(limits = c(0.5,10.5), breaks = 1:10)+
   ggtitle("¿Cuán probable es que continúes los estudios superiores al terminar la secundaria?")
@@ -87,8 +87,6 @@ orientacion_vocacional_cuanti_raw %>%
 
 
 ```{r sample info}
-
-
 
 
 df_completo %>% 
@@ -128,8 +126,8 @@ df_completo %>%
 
 df_completo %>% 
   filter(gender %in% c("Femenino", "Masculino")) %>% 
-  group_by(gender, probable_continuar_estudios) %>% 
-  summarise(Cantidad = n()
+  # group_by(gender, probable_continuar_estudios) %>% 
+  summarise(Cantidad = n(),.by = c(gender, probable_continuar_estudios)
             ) %>% 
   group_by(gender) %>% 
   mutate(Porcentaje = Cantidad/sum(Cantidad)*100) %>% 
@@ -142,67 +140,83 @@ df_completo %>%
 
 ```
 
+
 ```{r sample info}
 
 
-df_completo %>% 
-  group_by(max_educ_level_mother) %>% 
+probable_continuar_x_educ_mother <- df_completo %>% 
+  group_by(max_educ_level_mother_agrup) %>% 
   summarise(Participantes = as.character(n()),
-            Probabilidad = mean_sd(probable_continuar_estudios)
+            'De acuerdo al nivel educativo de la madre' = mean_sd(probable_continuar_estudios)
             ) %>% 
-  # mutate(Probabilidad = ifelse(Participantes == 1, "-", Probabilidad)) %>% 
   select(-Participantes) %>% 
   pivot_longer(
-    cols = c(Probabilidad), 
+    cols = c('De acuerdo al nivel educativo de la madre'), 
     names_to = " ", 
     values_to = "valor"
   ) %>% 
   pivot_wider(
-    names_from = max_educ_level_mother, 
+    names_from = max_educ_level_mother_agrup, 
     values_from = valor
-  ) %>% 
+  )
 
-  custom_flextable("Tabla 1. Probabilidad de continuar los estudios (del 1 al 10)")
+probable_continuar_x_educ_father <- df_completo %>% 
+  group_by(max_educ_level_father_agrup) %>% 
+  summarise(Participantes = as.character(n()),
+            'De acuerdo al nivel educativo de la madre' = mean_sd(probable_continuar_estudios)
+            ) %>% 
+  select(-Participantes) %>% 
+  pivot_longer(
+    cols = c('De acuerdo al nivel educativo de la madre'), 
+    names_to = " ", 
+    values_to = "valor"
+  ) %>% 
+  pivot_wider(
+    names_from = max_educ_level_father_agrup, 
+    values_from = valor
+  )
+
+
+
+rbind(probable_continuar_x_educ_mother, probable_continuar_x_educ_father)%>% 
+
+  custom_flextable("Tabla 1. Probabilidad de continuar los estudios de acuerdo al nivel educativo de los padres")
  
 
 
 ```
 
 
-```{r sample info}
+
+```{r fig.width = 10}
+
+p_1 <- df_completo %>% 
+
+  ggplot(aes(x = max_educ_level_mother_agrup, y = probable_continuar_estudios, fill = gender))+
+  geom_boxplot()+
+  # coord_flip()+
+  ggtitle("Probabilidad de continuar los estudios según el nivel educativo de la madre")+
+  theme_minimal()+
+  theme(axis.title.x = element_blank())
+
+p_2 <- df_completo %>% 
+
+  ggplot(aes(x = max_educ_level_mother_agrup, y = probable_continuar_estudios, fill = gender))+
+  geom_boxplot()+
+  # coord_flip()+
+  ggtitle("Probabilidad de continuar los estudios según el nivel educativo del padre")+
+  theme_minimal()+
+  theme(axis.title.x = element_blank())
 
 
-df_completo %>% 
-  group_by(max_educ_level_mother, gender) %>% 
-  mutate(max_educ_level_mother = factor(max_educ_level_mother,
-                                        c("Primario incompleto",
-                                          "Primario completo",
-                                          "Secundario incompleto",
-                                          "Secundario completo",
-                                          "Terciario incompleto",
-                                          "Universitario incompleto",
-                                          "Universitario completo",
-                                          "Posgrado incompleto"
-                                          
-                                        ))) %>% 
-  summarise(Participantes = as.character(n()),
-            Probabilidad = mean(probable_continuar_estudios)
-            ) %>% 
-  # mutate(Probabilidad = ifelse(Participantes == 1, "-", Probabilidad)) %>% 
-  select(-Participantes) %>% 
-  pivot_longer(
-    cols = c(Probabilidad), 
-    names_to = " ", 
-    values_to = "valor"
-  ) %>% 
-  
-  ggplot(aes(x = max_educ_level_mother, y = valor, fill = gender))+
-  geom_bar(stat = "identity", position = "dodge")+
-  coord_flip()
+
+ggpubr::ggarrange(p_1, p_2,ncol = 1,  common.legend = T, legend = "bottom")
+
+# table(df_completo$max_educ_level_father_agrup)
 
 
 ```
-El nivel educativo de madre y/o padre podría influir de forma distinta en varones y mujeres?
+
 
 ## 1. Tabla 1. Considera trabajar
 
@@ -257,19 +271,57 @@ df_completo %>%
 
 ```
 
-
 ```{r}
 
-df_completo %>% 
-  ggplot(aes(x = max_educ_level_father_num, y = probable_continuar_estudios, color = gender))+
-  geom_point(size = 3)+
-  geom_smooth(method = "lm")
+p_3 <- df_completo %>% 
+  
+  filter(gender %in% c("Femenino", "Masculino")) %>% 
+  summarise(Participantes = as.character(n()),
+            Porcentaje = mean(considera_trabajar)*100,
+            .by = c(gender, max_educ_level_father_agrup)
+            ) %>% 
+  ggplot(aes(x = max_educ_level_father_agrup, y = Porcentaje, fill = gender))+
+  geom_col(position = "dodge")+
+    geom_text(aes(label = paste(round(Porcentaje, digits = 2), "%")), 
+            position = position_dodge(width = 0.9),
+            vjust = 2,
+            color = "white")+
+  ggtitle("Porcentaje que planea trabajar según nivel educativo del padre")+
+  scale_y_continuous(limits = c(0,100))+
+  theme_minimal()+
+  theme(axis.title.x = element_blank())
 
 
 
 
+
+
+
+p_4 <- df_completo %>% 
+  
+  filter(gender %in% c("Femenino", "Masculino")) %>% 
+  summarise(Participantes = as.character(n()),
+            Porcentaje = mean(considera_trabajar)*100,
+            .by = c(gender, max_educ_level_mother_agrup)
+            ) %>% 
+  ggplot(aes(x = max_educ_level_mother_agrup, y = Porcentaje, fill = gender))+
+  geom_col(position = "dodge")+
+  geom_text(aes(label = paste(round(Porcentaje, digits = 2), "%")), 
+            position = position_dodge(width = 0.9),
+            vjust = 2,
+            color = "white")+
+  ggtitle("Porcentaje que planea trabajar según nivel educativo de la madre")+
+  scale_y_continuous(limits = c(0,100))+
+  theme_minimal()+
+  theme(axis.title.x = element_blank())
+
+
+
+
+ggpubr::ggarrange(p_3, p_4,ncol = 1,  common.legend = T, legend = "bottom")
 
 ```
+
 
 
 ```{r}

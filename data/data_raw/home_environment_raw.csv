@@ -1,54 +1,54 @@
-"ID","max_educ_level_mother","max_educ_level_father","max_educ_level_mother_num","max_educ_level_father_num"
-"VB007","Secundario completo","Secundario incompleto",4,3
-"VB008","Universitario completo","Secundario completo",9,4
-"VB009","Secundario incompleto","Secundario completo",3,4
-"VB010","Secundario incompleto","Secundario completo",3,4
-"VB011","Secundario completo","Secundario completo",4,4
-"VB012","Universitario completo","Secundario incompleto",9,3
-"VB013","Posgrado incompleto","Universitario incompleto",10,8
-"VB014","Secundario completo","Universitario completo",4,9
-"VB015","Universitario completo","Universitario completo",9,9
-"VB016","Universitario completo","Secundario completo",9,4
-"VB017","Secundario completo","Secundario completo",4,4
-"VB018","Secundario completo","Secundario incompleto",4,3
-"VB019","Secundario incompleto","Universitario incompleto",3,8
-"VB020","Universitario completo","Universitario completo",9,9
-"VB021","Terciario en curso","Universitario incompleto",7,8
-"VB022","Secundario completo","Secundario completo",4,4
-"VB023","Secundario completo","Secundario completo",4,4
-"VB024","Secundario incompleto","Secundario incompleto",3,3
-"VB025","Universitario incompleto","Universitario incompleto",8,8
-"VB026","Secundario completo","Secundario incompleto",4,3
-"VB027","Universitario incompleto","Secundario completo",8,4
-"VB029","Secundario completo","Secundario completo",4,4
-"VB028","Secundario completo","Universitario incompleto",4,8
-"VB030","Primario completo","Secundario incompleto",2,3
-"VB031","Universitario completo","Universitario completo",9,9
-"VB032","Secundario incompleto","Primario completo",3,2
-"VB033","Secundario incompleto","Primario completo",3,2
-"VB034","Secundario completo","Universitario incompleto",4,8
-"VB035","Terciario en curso","Secundario completo",7,4
-"VB036","Universitario completo","Posgrado completo",9,11
-"VB037","Terciario en curso","Secundario incompleto",7,3
-"VB038","Secundario completo","Secundario completo",4,4
-"VB039","Secundario incompleto","Secundario completo",3,4
-"VB040","Terciario en curso","Secundario completo",7,4
-"VB041","Secundario completo","Secundario completo",4,4
-"VB042","Secundario completo","Secundario incompleto",4,3
-"VB043","Secundario completo","Primario completo",4,2
-"VB044","Universitario completo","Secundario completo",9,4
-"VB045","Secundario completo","Secundario incompleto",4,3
-"VB046","Universitario completo","Universitario incompleto",9,8
-"VB047","Secundario incompleto","Secundario completo",3,4
-"VB049","Secundario completo","Universitario incompleto",4,8
-"VB050","Universitario completo","Secundario incompleto",9,3
-"VB051","Secundario incompleto","Secundario incompleto",3,3
-"VB052","Terciario en curso","Posgrado incompleto",7,10
-"VB053","Universitario completo","Universitario completo",9,9
-"VB054","Secundario incompleto","Universitario incompleto",3,8
-"VB055","Universitario incompleto","Secundario completo",8,4
-"VB056","Secundario incompleto","Secundario incompleto",3,3
-"VB057","Terciario en curso","Secundario completo",7,4
-"VB058","Terciario en curso","Secundario completo",7,4
-"VB059","Primario completo","Primario completo",2,2
-"VB060","Universitario incompleto","Secundario completo",8,4
+"ID","max_educ_level_mother","max_educ_level_father","max_educ_level_mother_num","max_educ_level_father_num","max_educ_level_mother_agrup","max_educ_level_father_agrup","max_educ_level_parental"
+"VB007","Secundario completo","Secundario incompleto",4,3,"Secundario completo","Secundario incompleto o menos",4
+"VB008","Universitario completo","Secundario completo",9,4,"Continuó estudios (finalizados o no)","Secundario completo",9
+"VB009","Secundario incompleto","Secundario completo",3,4,"Secundario incompleto o menos","Secundario completo",4
+"VB010","Secundario incompleto","Secundario completo",3,4,"Secundario incompleto o menos","Secundario completo",4
+"VB011","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB012","Universitario completo","Secundario incompleto",9,3,"Continuó estudios (finalizados o no)","Secundario incompleto o menos",9
+"VB013","Posgrado incompleto","Universitario incompleto",10,8,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",10
+"VB014","Secundario completo","Universitario completo",4,9,"Secundario completo","Continuó estudios (finalizados o no)",9
+"VB015","Universitario completo","Universitario completo",9,9,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",9
+"VB016","Universitario completo","Secundario completo",9,4,"Continuó estudios (finalizados o no)","Secundario completo",9
+"VB017","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB018","Secundario completo","Secundario incompleto",4,3,"Secundario completo","Secundario incompleto o menos",4
+"VB019","Secundario incompleto","Universitario incompleto",3,8,"Secundario incompleto o menos","Continuó estudios (finalizados o no)",8
+"VB020","Universitario completo","Universitario completo",9,9,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",9
+"VB021","Terciario en curso","Universitario incompleto",7,8,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",8
+"VB022","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB023","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB024","Secundario incompleto","Secundario incompleto",3,3,"Secundario incompleto o menos","Secundario incompleto o menos",3
+"VB025","Universitario incompleto","Universitario incompleto",8,8,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",8
+"VB026","Secundario completo","Secundario incompleto",4,3,"Secundario completo","Secundario incompleto o menos",4
+"VB027","Universitario incompleto","Secundario completo",8,4,"Continuó estudios (finalizados o no)","Secundario completo",8
+"VB029","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB028","Secundario completo","Universitario incompleto",4,8,"Secundario completo","Continuó estudios (finalizados o no)",8
+"VB030","Primario completo","Secundario incompleto",2,3,"Secundario incompleto o menos","Secundario incompleto o menos",3
+"VB031","Universitario completo","Universitario completo",9,9,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",9
+"VB032","Secundario incompleto","Primario completo",3,2,"Secundario incompleto o menos","Secundario incompleto o menos",3
+"VB033","Secundario incompleto","Primario completo",3,2,"Secundario incompleto o menos","Secundario incompleto o menos",3
+"VB034","Secundario completo","Universitario incompleto",4,8,"Secundario completo","Continuó estudios (finalizados o no)",8
+"VB035","Terciario en curso","Secundario completo",7,4,"Continuó estudios (finalizados o no)","Secundario completo",7
+"VB036","Universitario completo","Posgrado completo",9,11,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",11
+"VB037","Terciario en curso","Secundario incompleto",7,3,"Continuó estudios (finalizados o no)","Secundario incompleto o menos",7
+"VB038","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB039","Secundario incompleto","Secundario completo",3,4,"Secundario incompleto o menos","Secundario completo",4
+"VB040","Terciario en curso","Secundario completo",7,4,"Continuó estudios (finalizados o no)","Secundario completo",7
+"VB041","Secundario completo","Secundario completo",4,4,"Secundario completo","Secundario completo",4
+"VB042","Secundario completo","Secundario incompleto",4,3,"Secundario completo","Secundario incompleto o menos",4
+"VB043","Secundario completo","Primario completo",4,2,"Secundario completo","Secundario incompleto o menos",4
+"VB044","Universitario completo","Secundario completo",9,4,"Continuó estudios (finalizados o no)","Secundario completo",9
+"VB045","Secundario completo","Secundario incompleto",4,3,"Secundario completo","Secundario incompleto o menos",4
+"VB046","Universitario completo","Universitario incompleto",9,8,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",9
+"VB047","Secundario incompleto","Secundario completo",3,4,"Secundario incompleto o menos","Secundario completo",4
+"VB049","Secundario completo","Universitario incompleto",4,8,"Secundario completo","Continuó estudios (finalizados o no)",8
+"VB050","Universitario completo","Secundario incompleto",9,3,"Continuó estudios (finalizados o no)","Secundario incompleto o menos",9
+"VB051","Secundario incompleto","Secundario incompleto",3,3,"Secundario incompleto o menos","Secundario incompleto o menos",3
+"VB052","Terciario en curso","Posgrado incompleto",7,10,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",10
+"VB053","Universitario completo","Universitario completo",9,9,"Continuó estudios (finalizados o no)","Continuó estudios (finalizados o no)",9
+"VB054","Secundario incompleto","Universitario incompleto",3,8,"Secundario incompleto o menos","Continuó estudios (finalizados o no)",8
+"VB055","Universitario incompleto","Secundario completo",8,4,"Continuó estudios (finalizados o no)","Secundario completo",8
+"VB056","Secundario incompleto","Secundario incompleto",3,3,"Secundario incompleto o menos","Secundario incompleto o menos",3
+"VB057","Terciario en curso","Secundario completo",7,4,"Continuó estudios (finalizados o no)","Secundario completo",7
+"VB058","Terciario en curso","Secundario completo",7,4,"Continuó estudios (finalizados o no)","Secundario completo",7
+"VB059","Primario completo","Primario completo",2,2,"Secundario incompleto o menos","Secundario incompleto o menos",2
+"VB060","Universitario incompleto","Secundario completo",8,4,"Continuó estudios (finalizados o no)","Secundario completo",8
